@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <com.mapbox.mapboxsdk.maps.MapView
+        app:center_latitude="52.408135"
+        app:center_longitude="16.929662"
+        app:zoom="15"
+        android:id="@+id/mapview"
+        app:access_token="pk.eyJ1IjoidG9tYXN6dyIsImEiOiJjaXB5MGxoa2EwMDgzaThub2NtMzlkbDU4In0.ABcpoyeaYSCRLInNBNKBEw"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</android.support.constraint.ConstraintLayout>

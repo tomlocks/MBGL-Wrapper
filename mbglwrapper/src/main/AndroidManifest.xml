@@ -1,0 +1,6 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.tomlocksapps.mbglwrapper">
+    <application>
+        <service android:name="com.mapbox.mapboxsdk.telemetry.TelemetryService" />
+    </application>
+</manifest>
