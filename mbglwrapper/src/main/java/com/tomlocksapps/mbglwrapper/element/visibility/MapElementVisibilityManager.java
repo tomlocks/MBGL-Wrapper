@@ -1,13 +1,15 @@
 package com.tomlocksapps.mbglwrapper.element.visibility;
 
+import android.content.Context;
 import android.location.Location;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import com.mapbox.mapboxsdk.annotations.Marker;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.tomlocksapps.mbglwrapper.element.IElementController;
 import com.tomlocksapps.mbglwrapper.element.custom.ExtraMarkerLocationCalculation;
 import com.tomlocksapps.mbglwrapper.element.custom.marker.adapter.ContainerViewHolder;
 import com.tomlocksapps.mbglwrapper.element.custom.marker.view.ComparableMarkerView;
@@ -27,22 +29,21 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
     public static final int DISTANCE_THRESHOLD = 100;
 
     private MapboxMap map;
-    private MapZoomSettings mapZoomSettings = new MapZoomSettings();
+    private final MapZoomSettings mapZoomSettings = new MapZoomSettings();
 
     private double lastZoom = -1;
 
     private int distanceTraveled;
     private Location lastLocation;
 
-    private static final double ZOOM_DEADBAND = 0.1; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania widocznosci POIow
-  //  private Animation showAnim;
+    private static final double ZOOM_DEADBAND = 0.05; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania widocznosci POIow
+    private Animation showAnim;
 
+    private final Context context;
 
-
-    public MapElementVisibilityManager() {
-
-
-     //   showAnim = AnimationUtils.loadAnimation(App.getContext(), R.anim.overshoot_fade_in_marker);
+    public MapElementVisibilityManager(Context context) {
+        this.context = context;
+        showAnim = AnimationUtils.loadAnimation(context, android.R.anim.fade_in);
     }
 
     public void setMap(MapboxMap map) {
@@ -62,7 +63,7 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
         Logger.getInstance().d("MarkerController - onCameraChange - MapElementVisibilityManager - refreshing Markers: " + position);
 
         for (Marker marker : map.getMarkers()) {
-            checkMarkerVisiblity(position.zoom, marker);
+            checkMarkerVisibility(position.zoom, marker);
         }
 
         lastZoom = position.zoom;
@@ -73,7 +74,7 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
      *
      * @param marker Marker do sprawdzenia
      */
-    public void checkMarkerVisiblity(double zoom, Marker marker) {
+    public void checkMarkerVisibility(double zoom, Marker marker) {
         if (marker instanceof ComparableMarkerView) {
             final ComparableMarkerView markerView = (ComparableMarkerView) marker;
 
@@ -103,25 +104,20 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
 
                         if (canShowMarker) {
                             if(viewHolder.container.getVisibility() != View.VISIBLE) {
-                                    viewHolder.container.setVisibility(View.VISIBLE);
-//                                    viewHolder.container.startAnimation(showAnim);
-                                    Logger.getInstance().d("Marker animation - animating: " + marker.getClass() + " | " + viewHolder.container + " | child count: " + ((ViewGroup)viewHolder.container).getChildCount());
+                                viewHolder.container.setVisibility(View.VISIBLE);
+                                viewHolder.container.clearAnimation();
+                                viewHolder.container.startAnimation(showAnim);
+                                Logger.getInstance().d("Marker animation - animating: " + marker.getClass() + " | " + viewHolder.container + " | child count: " + ((ViewGroup)viewHolder.container).getChildCount());
                             }
                         } else {
                             if(viewHolder.container.getVisibility() == View.VISIBLE) {
-                                    viewHolder.container.setVisibility(View.GONE);
-
-//                                    viewHolder.container.clearAnimation();
+                                    viewHolder.container.setVisibility(View.INVISIBLE);
                             }
                         }
                     }
                 }
 
                 if (canShowMarker) {
-                    // fix na niepojawiajace sie markery, dluzej nie potrzebny, przywrocic gdyby mapbox cos nakasztanil
-/*                    if (view != null) {
-                        view.setVisibility(View.VISIBLE);
-                    }*/
                     markerView.setVisible(true);
                 } else {
                     markerView.setVisible(false);
@@ -131,33 +127,8 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
         }
     }
 
-/*    public void onNewLocation(Location location) {
-        if(location != null) {
-            if(lastLocation != null) {
-                distanceTraveled  = distanceTraveled + GeoUtil.distance(location, lastLocation);
-
-                if(distanceTraveled > DISTANCE_THRESHOLD) {
-                    distanceTraveled = 0;
-
-                    lastLocation = new Location(location);
-
-                    //checking POIs
-                    checkLocationAwareMarkers();
-                }
-            } else {
-                lastLocation = new Location(location);
-
-                checkLocationAwareMarkers();
-            }
-        }
-    }*/
-
-    private void checkLocationAwareMarkers() {
-        for (Marker marker : map.getMarkers()) {
-            if(marker instanceof ExtraMarkerLocationCalculation) {
-                checkMarkerVisiblity(lastZoom, marker);
-            }
-        }
+    public MapZoomSettings getMapZoomSettings() {
+        return mapZoomSettings;
     }
 
     public double getZoom() {

@@ -9,8 +9,7 @@
         android:layout_width="@dimen/map_marker_size_poi"
         android:layout_height="@dimen/map_marker_size_poi"
         android:id="@+id/container"
-
-        android:visibility="gone">
+        android:visibility="invisible">
 
         <ImageView
             android:scaleType="fitCenter"

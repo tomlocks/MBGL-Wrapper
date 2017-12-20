@@ -15,12 +15,6 @@ public abstract class MarkerClickHandler<T extends Marker> {
         this.type = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
-    public final void handleClick(T marker) {
-        if(type.isAssignableFrom(marker.getClass())) {
-            handleMyMarkerClick(marker);
-        }
-    }
-
     public Class<T> getType() {
         return type;
     }

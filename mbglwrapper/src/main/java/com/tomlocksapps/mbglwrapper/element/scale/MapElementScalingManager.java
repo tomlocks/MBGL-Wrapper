@@ -107,7 +107,7 @@ public class MapElementScalingManager implements MapboxMap.OnCameraChangeListene
                 }
             });
 
-            scaleMarkersFromProviders(elementScallingSetting, elementsProvider, zoom); // todo
+            scaleMarkersFromProviders(elementScallingSetting, elementsProvider, zoom);
         }
     }
 

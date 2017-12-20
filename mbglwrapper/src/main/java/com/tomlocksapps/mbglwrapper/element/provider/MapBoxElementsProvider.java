@@ -56,8 +56,20 @@ public abstract class MapBoxElementsProvider<T> {
     private final List<MapBoxMarkerFilter> markerFilters = new ArrayList<>();
 
     public MapBoxElementsProvider() {
-        typeClass = (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+        Class<? extends MapBoxElementsProvider> providerClass = findMapBoxElementsProviderClass(getClass());
+
+        typeClass = (Class<T>) ((ParameterizedType) providerClass.getGenericSuperclass()).getActualTypeArguments()[0];
         tag = provideElementProviderTag();
+    }
+
+    private Class<? extends MapBoxElementsProvider> findMapBoxElementsProviderClass(Class clazz) { // this method may fail
+        if(clazz.getGenericSuperclass() instanceof ParameterizedType) {
+            String s = clazz.toString();
+            return clazz;
+        } else {
+            Class superclass = clazz.getSuperclass();
+            return findMapBoxElementsProviderClass(superclass);
+        }
     }
 
     protected abstract String provideElementProviderTag();

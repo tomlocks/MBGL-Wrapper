@@ -1,23 +1,23 @@
 package com.tomlocksapps.mbglwrapper.example;
 
-import android.os.Parcel;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
-import com.mapbox.mapboxsdk.annotations.BaseMarkerViewOptions;
+import com.mapbox.mapboxsdk.Mapbox;
 import com.mapbox.mapboxsdk.annotations.MarkerView;
-import com.mapbox.mapboxsdk.annotations.Polyline;
+import com.mapbox.mapboxsdk.constants.MapboxConstants;
 import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.tomlocksapps.mbglwrapper.ExamplePoiProvider;
 import com.tomlocksapps.mbglwrapper.element.MapElementController;
-import com.tomlocksapps.mbglwrapper.element.custom.marker.option.ComparableMarkerViewOptions;
-import com.tomlocksapps.mbglwrapper.element.custom.marker.option.GenericMarkerViewOptions;
+import com.tomlocksapps.mbglwrapper.element.custom.marker.view.ComparableMarkerView;
+import com.tomlocksapps.mbglwrapper.element.handler.GenericMarkerClickHandler;
 import com.tomlocksapps.mbglwrapper.element.model.PoiModel;
 import com.tomlocksapps.mbglwrapper.element.provider.ExampleElementProvider;
-import com.tomlocksapps.mbglwrapper.element.provider.OnNewElementsListener;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.impl.DefaultElementScallingSetting;
+import com.tomlocksapps.mbglwrapper.element.visibility.settings.marker.MarkerZoomSetting;
 
 import java.util.List;
 
@@ -30,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Mapbox.getInstance(getApplicationContext(), "pk.eyJ1IjoidG9tYXN6dyIsImEiOiJjaXB5MGxoa2EwMDgzaThub2NtMzlkbDU4In0.ABcpoyeaYSCRLInNBNKBEw"); //todo remove key
+
         setContentView(R.layout.activity_main);
 
         examplePoiProvider = new ExamplePoiProvider(onNewPoisListener);
@@ -38,8 +40,50 @@ public class MainActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
 
         mapElementController = new MapElementController(getApplicationContext());
-        mapElementController.addElementProvider(new ExampleElementProvider(getApplicationContext()));
-        mapElementController.addScaleSettings(ExampleElementProvider.class, new DefaultElementScallingSetting());
+        mapElementController.addElementProvider(new ExampleElementProvider(getApplicationContext()) {
+            @Override
+            protected List<PoiModel> provideDefaultObjectLocation() {
+                return examplePoiProvider.getPoiModels();
+            }
+        });
+        mapElementController.addScaleSettings(ExampleElementProvider.class, new DefaultElementScallingSetting() {
+
+            @Override
+            public float getMarkerScale(View view, MarkerView markerView, double zoom) {
+                if(markerView instanceof ComparableMarkerView) {
+                    ComparableMarkerView comparableMarkerView = (ComparableMarkerView) markerView;
+                    Object comparableObject = comparableMarkerView.getComparableObject();
+                    if(comparableObject instanceof PoiModel) {
+                        PoiModel poiModel = (PoiModel) comparableObject;
+
+                        float x = (float) (zoom / MapboxConstants.MAXIMUM_ZOOM); // from 0 to 1
+
+                        double exponent = poiModel.isHighlighted() ? 2 : 4;
+                        float scale = (float) Math.pow(x + 0.25, exponent); // (x+0.25)^4
+
+                        if (scale > 1)
+                            scale = 1;
+
+                        return scale;
+                    }
+                }
+
+                return super.getMarkerScale(view, markerView, zoom);
+            }
+
+        });
+
+        mapElementController.addZoomSetting(new MarkerZoomSetting<PoiModel>() {
+            @Override
+            public double getMinZoomForMarker(PoiModel object) {
+                if(object.isHighlighted())
+                    return 12;
+
+                return 14;
+            }
+        });
+
+        mapElementController.addClickHandler(new GenericMarkerClickHandler(this));
 
         mapView.getMapAsync(new OnMapReadyCallback() {
             @Override

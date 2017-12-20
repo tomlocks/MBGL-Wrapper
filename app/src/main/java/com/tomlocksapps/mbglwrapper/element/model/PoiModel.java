@@ -11,12 +11,25 @@ public class PoiModel {
     private final boolean isClickable;
     private final String iconUrl;
     private final Location location;
+    private final boolean highlight;
+    private final int id;
 
-    public PoiModel(String url, boolean isClickable, String iconUrl, Location location) {
+    public PoiModel(String url, boolean isClickable, String iconUrl, Location location, int id) {
         this.url = url;
         this.isClickable = isClickable;
         this.iconUrl = iconUrl;
         this.location = location;
+        this.id = id;
+        this.highlight = false;
+    }
+
+    public PoiModel(String url, boolean isClickable, String iconUrl, Location location, boolean highlight, int id) {
+        this.url = url;
+        this.isClickable = isClickable;
+        this.iconUrl = iconUrl;
+        this.location = location;
+        this.highlight = highlight;
+        this.id = id;
     }
 
     public String getUrl() {
@@ -35,6 +48,14 @@ public class PoiModel {
         return location;
     }
 
+    public boolean isHighlighted() {
+        return highlight;
+    }
+
+    public int getId() {
+        return id;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -43,6 +64,8 @@ public class PoiModel {
         PoiModel poiModel = (PoiModel) o;
 
         if (isClickable != poiModel.isClickable) return false;
+        if (highlight != poiModel.highlight) return false;
+        if (id != poiModel.id) return false;
         if (url != null ? !url.equals(poiModel.url) : poiModel.url != null) return false;
         if (iconUrl != null ? !iconUrl.equals(poiModel.iconUrl) : poiModel.iconUrl != null)
             return false;
@@ -55,6 +78,8 @@ public class PoiModel {
         result = 31 * result + (isClickable ? 1 : 0);
         result = 31 * result + (iconUrl != null ? iconUrl.hashCode() : 0);
         result = 31 * result + (location != null ? location.hashCode() : 0);
+        result = 31 * result + (highlight ? 1 : 0);
+        result = 31 * result + id;
         return result;
     }
 }

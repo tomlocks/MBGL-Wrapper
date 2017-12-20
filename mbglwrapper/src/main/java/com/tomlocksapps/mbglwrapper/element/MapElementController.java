@@ -17,12 +17,15 @@ import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.tomlocksapps.mbglwrapper.element.custom.info.MarkerInfoWindowManager;
 import com.tomlocksapps.mbglwrapper.element.custom.marker.adapter.ContainerAdapterView;
 import com.tomlocksapps.mbglwrapper.element.custom.marker.adapter.GenericAdapterView;
+import com.tomlocksapps.mbglwrapper.element.handler.MarkerClickHandler;
 import com.tomlocksapps.mbglwrapper.element.handler.PoiClickHandlerManager;
 import com.tomlocksapps.mbglwrapper.element.provider.MapBoxElementsProvider;
 import com.tomlocksapps.mbglwrapper.element.scale.MapElementScalingManager;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.ElementProviderScaleSettings;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.IElementScalingSetting;
 import com.tomlocksapps.mbglwrapper.element.visibility.MapElementVisibilityManager;
+import com.tomlocksapps.mbglwrapper.element.visibility.settings.MapZoomSettings;
+import com.tomlocksapps.mbglwrapper.element.visibility.settings.marker.MarkerZoomSetting;
 import com.tomlocksapps.mbglwrapper.logger.Logger;
 
 import java.util.Collection;
@@ -77,27 +80,13 @@ public class MapElementController implements IElementController{
     public MapElementController(Context context) {
         this.context = context;
 
-
-  //      naviElementsProvider = new NaviElementsProvider(context.getResources().getColor(R.color.new_look_secondary_color_bright_blue));
-
-     //   markerAnimator = new MarkerAnimator();
         markerInfoWindowManager = new MarkerInfoWindowManager(context);
         elementProviderScaleSettings = new ElementProviderScaleSettings();
 
         poiClickHandlerManager = new PoiClickHandlerManager();
-//        poiClickHandlerManager.putHandler(new PoiMarkerClickHandler());
-//        poiClickHandlerManager.putHandler(new GenericMarkerClickHandler());
 
-        mapElementVisibilityManager = new MapElementVisibilityManager();
+        mapElementVisibilityManager = new MapElementVisibilityManager(context);
         elementScalingManager = new MapElementScalingManager(elementProviderScaleSettings, elementsProviders, this);
-
-
-       // trafficJamAdapterView = new TrafficJamAdapterView(context, elementScalingManager);
-
-//        elementsProviders.add(new PoiElementsProvider());
-//        elementsProviders.add(new DynamicPoiElementsProvider(context, mapElementVisibilityManager));
-//        elementsProviders.add(naviElementsProvider);
-//        elementsProviders.add(new MapCenterElementsProvider());
 
         addMarkerViewAdapter(new GenericAdapterView(context));
 
@@ -130,7 +119,7 @@ public class MapElementController implements IElementController{
                         final MarkerView markerView = map.addMarker(marker);
                         mapBoxElementsProvider.addMarkerView(markerView);
 
-                        mapElementVisibilityManager.checkMarkerVisiblity(mapElementVisibilityManager.getZoom(), markerView);
+                        mapElementVisibilityManager.checkMarkerVisibility(mapElementVisibilityManager.getZoom(), markerView);
                     }
 
                     logger.d("MapElementController - OnNewElementListener - addMarkers - " + mapBoxElementsProvider.getTag() + " - toBeDeleted: " + toBeDeleted.size() + " - toBeAdded: " + toBeAdded.size() + " - UPDATED");
@@ -204,9 +193,11 @@ public class MapElementController implements IElementController{
 
         @Override
         public void onMapInteractionStopped(final MapBoxElementsProvider mapBoxElementsProvider) {
+            //todo zakleszczanie watkow
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
+                    //todo usuniecie zbednych logow
                     logger.d("MapElementController - OnNewElementListener - all Objects - markers: " + map.getMarkers().size() + " | polylines: " + map.getPolylines().size() + " | annotations: " + map.getAnnotations().size());
                     logger.d("MapElementController - OnNewElementListener - " + mapBoxElementsProvider.getTag() + " - Objects - markers: " + mapBoxElementsProvider.getMarkerViews().size() + " | polylines: " + mapBoxElementsProvider.getPolyLines().size() + " | annotations: " + map.getAnnotations().size());
 
@@ -350,7 +341,7 @@ public class MapElementController implements IElementController{
 
     @Override
     public void provideObjects(final Collection<? extends Object> objects) {
-        if (!enabled)
+        if (!enabled || map == null)
             return;
 
         logger.d("MarkerController - MapBoxMarkerProvider - new Objects - thread: " + Thread.currentThread().hashCode());
@@ -494,5 +485,13 @@ public class MapElementController implements IElementController{
 
     public void addScaleSettings(Class<? extends MapBoxElementsProvider> key, IElementScalingSetting value) {
         elementProviderScaleSettings.put(key, value);
+    }
+
+    public void addZoomSetting(MarkerZoomSetting markerZoomSetting) {
+        mapElementVisibilityManager.getMapZoomSettings().putZoomSetting(markerZoomSetting);
+    }
+
+    public void addClickHandler(MarkerClickHandler value) {
+        poiClickHandlerManager.putHandler(value);
     }
 }
