@@ -403,8 +403,10 @@ public abstract class MapBoxElementsProvider<T> {
     public void releaseLock() {
         Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - releaseLock Released - thread: " + Thread.currentThread());
         Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
-        countDownLatch.countDown();
+
+        CountDownLatch tmpLatch = countDownLatch;
         countDownLatch = null;
+        tmpLatch.countDown();
     }
 
     public void updatePolylines() {
