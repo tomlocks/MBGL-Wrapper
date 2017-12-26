@@ -25,7 +25,6 @@ import com.tomlocksapps.mbglwrapper.element.scale.MapElementScalingManager;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.ElementProviderScaleSettings;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.IElementScalingSetting;
 import com.tomlocksapps.mbglwrapper.element.visibility.MapElementVisibilityManager;
-import com.tomlocksapps.mbglwrapper.element.visibility.settings.MapZoomSettings;
 import com.tomlocksapps.mbglwrapper.element.visibility.settings.marker.MarkerZoomSetting;
 import com.tomlocksapps.mbglwrapper.logger.Logger;
 
@@ -56,11 +55,8 @@ public class MapElementController implements IElementController{
     private final ElementProviderScaleSettings elementProviderScaleSettings;
     private final Set<MapBoxElementsProvider> elementsProviders = new HashSet<>();
     private final Set<ContainerAdapterView> containerAdapterViews = new LinkedHashSet<>();
-
-   // private IMapController mapBoxController;
-    private PoiClickHandlerManager poiClickHandlerManager;
-    private MarkerInfoWindowManager markerInfoWindowManager;
- //   private IMarkerAnimator markerAnimator;
+    private final PoiClickHandlerManager poiClickHandlerManager;
+    private final MarkerInfoWindowManager markerInfoWindowManager;
 
     /**
      * Watek poboczny oraz handler dzialajacy na nim.
@@ -72,9 +68,6 @@ public class MapElementController implements IElementController{
      * Hadnler dzialajacy na watku glownym.
      */
     private Handler mainHandler = new Handler(Looper.getMainLooper());
-
-//    private final NaviElementsProvider naviElementsProvider;
-//    private final TrafficJamAdapterView trafficJamAdapterView;
 
     private final Logger logger = Logger.getInstance();
 
@@ -107,14 +100,12 @@ public class MapElementController implements IElementController{
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    logger.d("----- UI ------ MarkerController - OnNewElementListener - onNewMarkers ----- UI ------");
                     logger.d("MapElementController - OnNewElementListener - addMarkers - " + mapBoxElementsProvider.getTag() + " - toBeDeleted: " + toBeDeleted.size() + " - toBeAdded: " + toBeAdded.size());
 
                     for (MarkerView markerView : toBeDeleted) {
                         map.removeMarker(markerView);
                     }
 
-                    logger.d("MarkerController - OnNewElementListener - onNewMarkers - adding new Views: " + toBeAdded.size() + " | toBeDeleted size: " + toBeDeleted.size());
                     for (BaseMarkerViewOptions marker : toBeAdded) {
                         markerPositionValidator(marker);
                         final MarkerView markerView = map.addMarker(marker);
@@ -122,10 +113,6 @@ public class MapElementController implements IElementController{
 
                         mapElementVisibilityManager.checkMarkerVisibility(mapElementVisibilityManager.getZoom(), markerView);
                     }
-
-                    logger.d("MapElementController - OnNewElementListener - addMarkers - " + mapBoxElementsProvider.getTag() + " - toBeDeleted: " + toBeDeleted.size() + " - toBeAdded: " + toBeAdded.size() + " - UPDATED");
-
-
                 }
             });
         }
@@ -135,8 +122,6 @@ public class MapElementController implements IElementController{
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    logger.d("MarkerController - OnNewElementListener - removePolylines - | mapBoxElementsProvider: " + mapBoxElementsProvider);
-
                     logger.d("MapElementController - OnNewElementListener - removePolylines - " + mapBoxElementsProvider.getTag());
 
                     final List<Polyline> polyLines = mapBoxElementsProvider.getPolyLines();
@@ -145,10 +130,7 @@ public class MapElementController implements IElementController{
                         map.removePolyline(polyLine);
                     }
 
-                    mapBoxElementsProvider.clearPolylinesList();
-
-                    logger.d("MapElementController - OnNewElementListener - removePolylines - " + mapBoxElementsProvider.getTag() + " - UPDATED ");
-                }
+                    mapBoxElementsProvider.clearPolylinesList();}
             });
         }
 
@@ -157,8 +139,6 @@ public class MapElementController implements IElementController{
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    logger.d("MarkerController - OnNewElementListener - onNewPolyLines - polylines: " + polyLines.size() + " | mapBoxElementsProvider: " + mapBoxElementsProvider);
-
                     logger.d("MapElementController - OnNewElementListener - addPolyLines - " + mapBoxElementsProvider.getTag() + " - " + polyLines.size());
 
                     final List<PolylineOptions> polyLine = mapBoxElementsProvider.getPolyLinesOptions();
@@ -167,9 +147,6 @@ public class MapElementController implements IElementController{
 
                     final List<Polyline> polylines = map.addPolylines(polyLine);
                     mapBoxElementsProvider.addPolylines(polylines);
-
-                    logger.d("MapElementController - OnNewElementListener - addPolyLines - " + mapBoxElementsProvider.getTag() + " - " + polyLines.size() + " - UPDATED ");
-
                 }
             });
         }
@@ -179,36 +156,22 @@ public class MapElementController implements IElementController{
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    logger.d("MarkerController - OnNewElementListener - updatePolylines - polylines: ");
-
                     logger.d("MapElementController - OnNewElementListener - updatePolylines - " + mapBoxElementsProvider.getTag() + " - " + polylines.size());
                     for (Polyline polyline : polylines) {
                         map.updatePolyline(polyline);
                     }
-                    logger.d("MapElementController - OnNewElementListener - updatePolylines - " + mapBoxElementsProvider.getTag() + " - " + polylines.size() + " - UPDATED");
-
-
                 }
             });
         }
 
         @Override
         public void onMapInteractionStopped(final MapBoxElementsProvider mapBoxElementsProvider) {
-            //todo zakleszczanie watkow
             mainHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    //todo usuniecie zbednych logow
                     logger.d("MapElementController - OnNewElementListener - all Objects - markers: " + map.getMarkers().size() + " | polylines: " + map.getPolylines().size() + " | annotations: " + map.getAnnotations().size());
-                    logger.d("MapElementController - OnNewElementListener - " + mapBoxElementsProvider.getTag() + " - Objects - markers: " + mapBoxElementsProvider.getMarkerViews().size() + " | polylines: " + mapBoxElementsProvider.getPolyLines().size() + " | annotations: " + map.getAnnotations().size());
-
-                    logger.d("MarkerController - OnNewElementListener - current Objects - markers: " + map.getMarkers().size() + " | polylines: " + map.getPolylines().size() + " | annotations: " + map.getAnnotations().size());
-                    logger.d("MarkerController - OnNewElementListener - current Provider Objects - markers: " + mapBoxElementsProvider.getMarkerViews().size() + " | polylines: " + mapBoxElementsProvider.getPolyLines().size() + " | annotations: " + map.getAnnotations().size());
 
                     mapBoxElementsProvider.releaseLock();
-
-                    logger.d("MapElementController - OnNewElementListener - " + mapBoxElementsProvider.getTag() + " - Objects - markers: " + mapBoxElementsProvider.getMarkerViews().size() + " | polylines: " + mapBoxElementsProvider.getPolyLines().size() + " | annotations: " + map.getAnnotations().size() + " - UPDATED ");
-
                 }
             });
 
@@ -256,12 +219,12 @@ public class MapElementController implements IElementController{
 
     @Override
     public void initialize() {
-//        markerAnimator.initialize();
+        //not used now
     }
 
     @Override
     public void uninitialize() {
-//        markerAnimator.uninitialize();
+        //not used now
     }
 
     @Override
@@ -276,19 +239,9 @@ public class MapElementController implements IElementController{
         map.getMarkerViewManager().setOnMarkerViewClickListener(onMarkerClickListener);
 
         map.setOnCameraChangeListener(onCameraChangeListener);
-
-
-
-//        map.getMarkerViewManager().addMarkerViewAdapter(new PoiAdapterView(context, elementScalingManager));
-//        map.getMarkerViewManager().addMarkerViewAdapter(trafficJamAdapterView);
-//        map.getMarkerViewManager().addMarkerViewAdapter(new GenericAdapterView(context, elementScalingManager));
-
         map.setInfoWindowAdapter(markerInfoWindowManager);
 
         mapElementVisibilityManager.setMap(map);
-
-
-//        markerAnimator.setMap(map);
         elementScalingManager.setMarkerViewManager(map.getMarkerViewManager());
 
         refreshProviders();
@@ -326,7 +279,6 @@ public class MapElementController implements IElementController{
         @Override
         public void onCameraChange(CameraPosition position) {
             mapElementVisibilityManager.onCameraChange(position);
-          //  trafficJamAdapterView.setZoomLevel(mapElementVisibilityManager.getZoom());
             elementScalingManager.onCameraChange(position);
         }
     };
@@ -404,7 +356,6 @@ public class MapElementController implements IElementController{
 
                         logger.d("UpdateElements - MapElementUpdateRunnable - lock - acquiring");
                         provider.acquireLock();
-                        logger.d("UpdateElements - MapElementUpdateRunnable - lock -  Released - anyUpdated: " + elementUpdateRunnable.wasAnyUpdaated());
 
                         break;
                     }
@@ -421,16 +372,15 @@ public class MapElementController implements IElementController{
             public void run() {
                 for (MapBoxElementsProvider provider : elementsProviders) {
                     if (provider.getClass().equals(elementUpdateRunnable.getProviderClass())) {
-
                         elementUpdateRunnable.setElementsProvider(provider);
                         mainHandler.post(elementUpdateRunnable);
 
                         logger.d("UpdatePolylines - MapElementUpdateRunnable - lock - acquiring");
                         provider.acquireLock();
-                        logger.d("UpdatePolylines - MapElementUpdateRunnable - lock -  Released - anyUpdated: " + elementUpdateRunnable.wasAnyUpdaated());
 
                         if(elementUpdateRunnable.wasAnyUpdaated())
                             provider.updatePolylines();
+
                         break;
                     }
                 }

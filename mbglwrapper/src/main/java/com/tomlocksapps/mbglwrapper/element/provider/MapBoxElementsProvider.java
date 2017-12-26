@@ -387,7 +387,6 @@ public abstract class MapBoxElementsProvider<T> {
      */
     public void acquireLock() {
         try {
-            Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - acquiring - thread: " + Thread.currentThread());
             Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - locking - thread: " + Thread.currentThread().hashCode());
 
             if(countDownLatch != null)
@@ -401,7 +400,6 @@ public abstract class MapBoxElementsProvider<T> {
      * Sciaga blokade czasowa na watek.
      */
     public void releaseLock() {
-        Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - releaseLock Released - thread: " + Thread.currentThread());
         Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
 
         CountDownLatch tmpLatch = countDownLatch;
