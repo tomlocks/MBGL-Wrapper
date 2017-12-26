@@ -401,12 +401,10 @@ public abstract class MapBoxElementsProvider<T> {
      * Sciaga blokade czasowa na watek.
      */
     public void releaseLock() {
-        synchronized (countDownLatch) {
-            Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - releaseLock Released - thread: " + Thread.currentThread());
-            Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
-            countDownLatch.countDown();
-            countDownLatch = null;
-        }
+        Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - releaseLock Released - thread: " + Thread.currentThread());
+        Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
+        countDownLatch.countDown();
+        countDownLatch = null;
     }
 
     public void updatePolylines() {
