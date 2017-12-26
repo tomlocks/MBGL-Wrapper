@@ -119,6 +119,13 @@ public class MainActivity extends AppCompatActivity {
         mapView.onSaveInstanceState(outState);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mapElementController.onDestroy();
+    }
+
     private final ExamplePoiProvider.OnNewPoisListener onNewPoisListener = new ExamplePoiProvider.OnNewPoisListener() {
         @Override
         public void onNewPois(List<PoiModel> poiModels) {
