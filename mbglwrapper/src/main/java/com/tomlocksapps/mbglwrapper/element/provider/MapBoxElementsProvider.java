@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -23,37 +24,30 @@ import java.util.List;
  */
 public abstract class MapBoxElementsProvider<T> {
 
-    private OnNewElementsListener onNewElementsListener;
-
-    private Class<T> typeClass;
-    private MapCallbacks mapCallbacks;
-    private final Object lock = new Object();
     private final String tag;
-
-    private boolean polylinesEnabled = true;
-    private boolean markersEnabled = true;
-
     /**
      * Lista markerow, ktore maja byc dodane do mapy.
      */
     private final List<BaseMarkerViewOptions> markersOptions = new ArrayList<>();
-
     /**
      * List polylines, ktore maja byc dodane do mapy.
      */
     private final List<PolylineOptions> polyLinesOptions = new ArrayList<>();
-
     /**
      * Lista markerow aktualnie dodanych do mapy.
      */
     private final List<MarkerView> markerViews = new ArrayList<>();
-
     /**
      * List polylines aktualnie dodanych do mapy.
      */
     private final List<Polyline> polyLines = new ArrayList<>();
-
     private final List<MapBoxMarkerFilter> markerFilters = new ArrayList<>();
+    private OnNewElementsListener onNewElementsListener;
+    private Class<T> typeClass;
+    private MapCallbacks mapCallbacks;
+    private CountDownLatch countDownLatch;
+    private boolean polylinesEnabled = true;
+    private boolean markersEnabled = true;
 
     public MapBoxElementsProvider() {
         Class<? extends MapBoxElementsProvider> providerClass = findMapBoxElementsProviderClass(getClass());
@@ -63,7 +57,7 @@ public abstract class MapBoxElementsProvider<T> {
     }
 
     private Class<? extends MapBoxElementsProvider> findMapBoxElementsProviderClass(Class clazz) { // this method may fail
-        if(clazz.getGenericSuperclass() instanceof ParameterizedType) {
+        if (clazz.getGenericSuperclass() instanceof ParameterizedType) {
             String s = clazz.toString();
             return clazz;
         } else {
@@ -339,19 +333,6 @@ public abstract class MapBoxElementsProvider<T> {
 
     }
 
-    public interface MapCallbacks {
-        void addMarkers(final List<MarkerView> toBeDeleted, final List<BaseMarkerViewOptions> toBeAdded, final MapBoxElementsProvider mapBoxElementsProvider);
-
-        void updatePolylines(final List<Polyline> polylines, final MapBoxElementsProvider mapBoxElementsProvider);
-
-        void removePolylines(final MapBoxElementsProvider mapBoxElementsProvider);
-
-        void addPolyLines(final List<PolylineOptions> polyLines, final MapBoxElementsProvider mapBoxElementsProvider);
-
-        void onMapInteractionStopped(final MapBoxElementsProvider mapBoxElementsProvider);
-
-    }
-
     /**
      * Pobiera ponownie liste obietkow dla danego providera, a na ich podstawie tworzy elementy. Tylko gdy provideDefaultObjectLocation zwraca jakas liste.
      */
@@ -405,27 +386,26 @@ public abstract class MapBoxElementsProvider<T> {
      * Powoduje zatrzymanie watku na czas 10.
      */
     public void acquireLock() {
+        try {
+            Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - acquiring - thread: " + Thread.currentThread());
+            Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - locking - thread: " + Thread.currentThread().hashCode());
 
-        synchronized (lock) {
-            try {
-                Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - acquiring - thread: " + Thread.currentThread());
-                Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - locking - thread: " + Thread.currentThread().hashCode());
-                lock.wait(10_000);
-            } catch (InterruptedException e) {
-                return;
-            }
-        }
-
+            if(countDownLatch != null)
+                throw new IllegalStateException("At this point coundownlatch cannot be non null");
+            countDownLatch = new CountDownLatch(1);
+            countDownLatch.await();
+        } catch (InterruptedException e) {}
     }
 
     /**
      * Sciaga blokade czasowa na watek.
      */
     public void releaseLock() {
-        synchronized (lock) {
+        synchronized (countDownLatch) {
             Logger.getInstance().d("MarkerController - MapElementUpdateRunnable - releaseLock Released - thread: " + Thread.currentThread());
             Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
-            lock.notifyAll();
+            countDownLatch.countDown();
+            countDownLatch = null;
         }
     }
 
@@ -447,5 +427,18 @@ public abstract class MapBoxElementsProvider<T> {
 
     public String getTag() {
         return tag;
+    }
+
+    public interface MapCallbacks {
+        void addMarkers(final List<MarkerView> toBeDeleted, final List<BaseMarkerViewOptions> toBeAdded, final MapBoxElementsProvider mapBoxElementsProvider);
+
+        void updatePolylines(final List<Polyline> polylines, final MapBoxElementsProvider mapBoxElementsProvider);
+
+        void removePolylines(final MapBoxElementsProvider mapBoxElementsProvider);
+
+        void addPolyLines(final List<PolylineOptions> polyLines, final MapBoxElementsProvider mapBoxElementsProvider);
+
+        void onMapInteractionStopped(final MapBoxElementsProvider mapBoxElementsProvider);
+
     }
 }
