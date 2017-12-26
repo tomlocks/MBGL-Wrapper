@@ -379,9 +379,10 @@ public class MapElementController implements IElementController{
 
     @Override
     public void onDestroy() {
-        handlerThread.interrupt();
         mainHandler.removeCallbacksAndMessages(null);
         handler.removeCallbacksAndMessages(null);
+        handlerThread.quit();
+        handlerThread.interrupt();
     }
 
     @Override
