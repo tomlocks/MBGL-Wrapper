@@ -11,7 +11,7 @@ import com.tomlocksapps.mbglwrapper.element.scale.settings.IElementScalingSettin
  * Created by walczewski on 20.12.2016.
  */
 
-public class DefaultElementScallingSetting implements IElementScalingSetting {
+public class DefaultElementScalingSetting implements IElementScalingSetting {
 
     private float polylineScaleFactor = 1.1f;
 

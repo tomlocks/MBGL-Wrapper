@@ -16,7 +16,7 @@ import com.tomlocksapps.mbglwrapper.element.custom.marker.view.ComparableMarkerV
 import com.tomlocksapps.mbglwrapper.element.handler.GenericMarkerClickHandler;
 import com.tomlocksapps.mbglwrapper.element.model.PoiModel;
 import com.tomlocksapps.mbglwrapper.element.provider.ExampleElementProvider;
-import com.tomlocksapps.mbglwrapper.element.scale.settings.impl.DefaultElementScallingSetting;
+import com.tomlocksapps.mbglwrapper.element.scale.settings.impl.DefaultElementScalingSetting;
 import com.tomlocksapps.mbglwrapper.element.visibility.settings.marker.MarkerZoomSetting;
 
 import java.util.List;
@@ -40,13 +40,17 @@ public class MainActivity extends AppCompatActivity {
         mapView.onCreate(savedInstanceState);
 
         mapElementController = new MapElementController(getApplicationContext());
-        mapElementController.addElementProvider(new ExampleElementProvider(getApplicationContext()) {
+
+        ExampleElementProvider elementProvider = new ExampleElementProvider(getApplicationContext()) {
             @Override
             protected List<PoiModel> provideDefaultObjectLocation() {
                 return examplePoiProvider.getPoiModels();
             }
-        });
-        mapElementController.addScaleSettings(ExampleElementProvider.class, new DefaultElementScallingSetting() {
+        };
+
+        mapElementController.addElementProvider(elementProvider);
+
+        mapElementController.addScaleSettings(elementProvider.getClass(), new DefaultElementScalingSetting() {
 
             @Override
             public float getMarkerScale(View view, MarkerView markerView, double zoom) {
@@ -58,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
 
                         float x = (float) (zoom / MapboxConstants.MAXIMUM_ZOOM); // from 0 to 1
 
-                        double exponent = poiModel.isHighlighted() ? 2 : 4;
+                        double exponent = poiModel.isHighlighted() ? 2 : 6;
                         float scale = (float) Math.pow(x + 0.25, exponent); // (x+0.25)^4
 
                         if (scale > 1)
@@ -77,9 +81,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public double getMinZoomForMarker(PoiModel object) {
                 if(object.isHighlighted())
-                    return 12;
+                    return 10.5f;
 
-                return 14;
+                return 12;
             }
         });
 

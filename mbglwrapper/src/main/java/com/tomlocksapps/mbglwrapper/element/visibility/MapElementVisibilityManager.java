@@ -36,7 +36,7 @@ public class MapElementVisibilityManager implements MapboxMap.OnCameraChangeList
     private int distanceTraveled;
     private Location lastLocation;
 
-    private static final double ZOOM_DEADBAND = 0.05; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania widocznosci POIow
+    private static final double ZOOM_DEADBAND = 0.1; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania widocznosci POIow
     private Animation showAnim;
 
     private final Context context;

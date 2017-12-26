@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.support.annotation.NonNull;
+import android.view.View;
 
 import com.mapbox.mapboxsdk.annotations.BaseMarkerViewOptions;
 import com.mapbox.mapboxsdk.annotations.Marker;
@@ -272,7 +273,7 @@ public class MapElementController implements IElementController{
         }
 
 
-        map.setOnMarkerClickListener(onMarkerClickListener);
+        map.getMarkerViewManager().setOnMarkerViewClickListener(onMarkerClickListener);
 
         map.setOnCameraChangeListener(onCameraChangeListener);
 
@@ -293,6 +294,20 @@ public class MapElementController implements IElementController{
         refreshProviders();
     }
 
+    private MapboxMap.OnMarkerViewClickListener onMarkerClickListener = new MapboxMap.OnMarkerViewClickListener() {
+        @Override
+        public boolean onMarkerClick(@NonNull Marker marker, @NonNull View view, @NonNull MapboxMap.MarkerViewAdapter adapter) {
+
+            if(markerInfoWindowManager.shouldShowInfoWindow(marker))
+                return false;
+
+            if(marker instanceof MarkerView && !((MarkerView) marker).isVisible())
+                return true;
+
+            return poiClickHandlerManager.handleClick(marker);
+        }
+    };
+
     /**
      * Odwieza providery. Powoduje to dodanie do mapy elementow z ich domyslnych list.
      */
@@ -306,28 +321,6 @@ public class MapElementController implements IElementController{
             }
         }, REFRESH_MARKER_DELAY);
     }
-
-    private MapboxMap.OnMarkerClickListener onMarkerClickListener = new MapboxMap.OnMarkerClickListener() {
-        @Override
-        public boolean onMarkerClick(@NonNull Marker marker) {
-
-            if(markerInfoWindowManager.shouldShowInfoWindow(marker))
-                return false;
-
-            if(marker instanceof MarkerView && !((MarkerView) marker).isVisible())
-                return true;
-
-            mainHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (map != null)
-                        map.deselectMarkers();
-                }
-            }, 25);
-
-            return poiClickHandlerManager.handleClick(marker);
-        }
-    };
 
     private MapboxMap.OnCameraChangeListener onCameraChangeListener = new MapboxMap.OnCameraChangeListener() {
         @Override
