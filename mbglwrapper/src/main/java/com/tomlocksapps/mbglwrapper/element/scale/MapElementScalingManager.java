@@ -25,7 +25,7 @@ import java.util.Set;
 
 public class MapElementScalingManager implements MapboxMap.OnCameraChangeListener {
 
-    private static final double ZOOM_DEADBAND = 0.1; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania skali
+    private static final double ZOOM_DEADBAND = 0.15; // wartosc w obrebie ktorej uzytkonwik moze zoomowac mape i nie powoduje to zmienienania skali
 
     private final ElementProviderScaleSettings settings;
     private final Set<MapBoxElementsProvider> elementsProviders;

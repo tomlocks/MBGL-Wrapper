@@ -15,7 +15,9 @@ import com.tomlocksapps.mbglwrapper.element.MapElementController;
 import com.tomlocksapps.mbglwrapper.element.custom.marker.view.ComparableMarkerView;
 import com.tomlocksapps.mbglwrapper.element.handler.GenericMarkerClickHandler;
 import com.tomlocksapps.mbglwrapper.element.model.PoiModel;
-import com.tomlocksapps.mbglwrapper.element.provider.ExampleElementProvider;
+import com.tomlocksapps.mbglwrapper.element.model.TrafficModel;
+import com.tomlocksapps.mbglwrapper.element.provider.ExamplePoiElementProvider;
+import com.tomlocksapps.mbglwrapper.element.provider.ExampleTrafficElementProvider;
 import com.tomlocksapps.mbglwrapper.element.scale.settings.impl.DefaultElementScalingSetting;
 import com.tomlocksapps.mbglwrapper.element.visibility.settings.marker.MarkerZoomSetting;
 
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         mapElementController = new MapElementController(getApplicationContext());
 
-        ExampleElementProvider elementProvider = new ExampleElementProvider(getApplicationContext()) {
+        ExamplePoiElementProvider elementProvider = new ExamplePoiElementProvider(getApplicationContext()) {
             @Override
             protected List<PoiModel> provideDefaultObjectLocation() {
                 return examplePoiProvider.getPoiModels();
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         mapElementController.addElementProvider(elementProvider);
+        mapElementController.addElementProvider(new ExampleTrafficElementProvider());
 
         mapElementController.addScaleSettings(elementProvider.getClass(), new DefaultElementScalingSetting() {
 
@@ -72,6 +75,16 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
+                return super.getMarkerScale(view, markerView, zoom);
+            }
+
+        });
+
+
+        mapElementController.addScaleSettings(ExampleTrafficElementProvider.class, new DefaultElementScalingSetting() {
+
+            @Override
+            public float getMarkerScale(View view, MarkerView markerView, double zoom) {
                 return super.getMarkerScale(view, markerView, zoom);
             }
 

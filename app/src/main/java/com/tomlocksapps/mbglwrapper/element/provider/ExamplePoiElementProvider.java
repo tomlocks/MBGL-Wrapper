@@ -19,11 +19,11 @@ import java.util.List;
  * Created by walczewski on 17.12.2017.
  */
 
-public class ExampleElementProvider extends MapBoxElementsProvider<PoiModel> {
+public class ExamplePoiElementProvider extends MapBoxElementsProvider<PoiModel> {
 
     private final Context context;
 
-    public ExampleElementProvider(Context context) {
+    public ExamplePoiElementProvider(Context context) {
         this.context = context;
 
         addFilter(new MapBoxMarkerFilter<PoiModel>() {

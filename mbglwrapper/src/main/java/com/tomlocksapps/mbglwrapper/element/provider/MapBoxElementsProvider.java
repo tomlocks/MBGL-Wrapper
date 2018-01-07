@@ -82,7 +82,7 @@ public abstract class MapBoxElementsProvider<T> {
      * @param objects Lista obiektow typu T
      * @return true jesli obiekty listy sa typu T, false w przciwnym wypadku.
      */
-    public boolean createNewMapObject(Collection<T> objects) {
+    public final boolean createNewMapObject(Collection<T> objects) {
         if (objects.size() == 0)
             return false;
 
