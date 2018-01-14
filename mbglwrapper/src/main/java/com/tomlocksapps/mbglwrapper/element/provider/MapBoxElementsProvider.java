@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 
 /**
@@ -45,9 +44,13 @@ public abstract class MapBoxElementsProvider<T> {
     private OnNewElementsListener onNewElementsListener;
     private Class<T> typeClass;
     private MapCallbacks mapCallbacks;
-    private CountDownLatch countDownLatch;
+
     private boolean polylinesEnabled = true;
     private boolean markersEnabled = true;
+
+  //  private final ResettableCountDownLatch countDownLatch = new ResettableCountDownLatch(1);
+    private final Object lock = new Object();
+    private boolean releaseCalled = false;
 
     public MapBoxElementsProvider() {
         Class<? extends MapBoxElementsProvider> providerClass = findMapBoxElementsProviderClass(getClass());
@@ -386,25 +389,27 @@ public abstract class MapBoxElementsProvider<T> {
      * Powoduje zatrzymanie watku na czas 10.
      */
     public void acquireLock() {
-        try {
-            Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - locking - thread: " + Thread.currentThread().hashCode());
+        synchronized (lock) {
+            try {
+                Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - locking - thread: " + Thread.currentThread().hashCode() + ", release: " + releaseCalled);
 
-            if(countDownLatch != null)
-                throw new IllegalStateException("At this point coundownlatch cannot be non null");
-            countDownLatch = new CountDownLatch(1);
-            countDownLatch.await();
-        } catch (InterruptedException e) {}
+                if (!releaseCalled) // checking if main thread didn't start immediately
+                    lock.wait();
+            } catch (InterruptedException e) {}
+
+            releaseCalled = false;
+        }
     }
 
     /**
      * Sciaga blokade czasowa na watek.
      */
     public void releaseLock() {
-        Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
-
-        CountDownLatch tmpLatch = countDownLatch;
-        countDownLatch = null;
-        tmpLatch.countDown();
+        synchronized (lock) {
+            lock.notify();
+            releaseCalled = true;
+            Logger.getInstance().d("MarkerController - MapBoxMarkerProvider - releaseLock - thread: " + Thread.currentThread().hashCode());
+        }
     }
 
     public void updatePolylines() {
