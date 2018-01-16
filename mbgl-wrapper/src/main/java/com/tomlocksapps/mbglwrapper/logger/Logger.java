@@ -9,7 +9,7 @@ import android.util.Log;
 public class Logger {
     private static Logger instance;
 
-    private final boolean active = true;
+    private final boolean active = false;
     private final String TAG = "MapBoxLogger";
 
     private Logger() {}
@@ -22,6 +22,7 @@ public class Logger {
     }
 
     public void d(String message) {
-        Log.d(TAG, message);
+        if(active)
+            Log.d(TAG, message);
     }
 }

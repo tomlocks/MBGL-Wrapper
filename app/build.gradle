@@ -1,6 +1,15 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        debugconfig {
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('/../debug.keystore')
+            storePassword 'android'
+        }
+    }
+
     compileSdkVersion 26
     defaultConfig {
         applicationId "com.tomlocksapps.mbglwrapper"
@@ -9,10 +18,11 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        signingConfig signingConfigs.debugconfig
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
@@ -28,5 +38,5 @@ dependencies {
 
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
-    api project(':mbglwrapper')
+    api project(':mbgl-wrapper')
 }

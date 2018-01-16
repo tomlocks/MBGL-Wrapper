@@ -9,12 +9,6 @@ import com.mapbox.mapboxsdk.annotations.MarkerView;
  */
 
 public interface IElementScalingSetting {
-    /**
-     * Returns the list of polylines that have been changed
-     *
-     * @param polylineOptions
-     * @return
-     */
 
     float getPolylineWidth(double zoom);
 

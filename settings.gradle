@@ -1,1 +1,1 @@
-include ':app', ':mbglwrapper'
+include ':app', ':mbgl-wrapper'

@@ -5,7 +5,8 @@
       <module fileurl="file://C:\dev_test\MBGLWrapper\.idea\MBGL-Wrapper.iml" filepath="C:\dev_test\MBGLWrapper\.idea\MBGL-Wrapper.iml" />
       <module fileurl="file://$PROJECT_DIR$/MBGLWrapper.iml" filepath="$PROJECT_DIR$/MBGLWrapper.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/mbglwrapper/mbglwrapper.iml" filepath="$PROJECT_DIR$/mbglwrapper/mbglwrapper.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mbgl-wrapper/mbgl-wrapper.iml" filepath="$PROJECT_DIR$/mbgl-wrapper/mbgl-wrapper.iml" />
+      <module fileurl="file://C:\dev_test\MBGLWrapper\mbgl-wrapper\mbglwrapper.iml" filepath="C:\dev_test\MBGLWrapper\mbgl-wrapper\mbglwrapper.iml" />
     </modules>
   </component>
 </project>
